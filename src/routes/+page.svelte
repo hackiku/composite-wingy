@@ -1,15 +1,27 @@
-<script lang="ts">
-  import { Sun, Moon } from "lucide-svelte";
-  import { toggleMode } from "mode-watcher";
-  import { Button } from "$lib/components/ui/button";
-</script>
+<!-- src/routes/+page.svelte -->
+<h1 class="text-3xl font-bold mb-8">Composite Wing Analysis</h1>
 
-<Button on:click={toggleMode} variant="outline" size="icon">
-  <Sun
-    class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
-  />
-  <Moon
-    class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
-  />
-  <span class="sr-only">Toggle theme</span>
-</Button>
+<section class="mb-12">
+  <h2 class="text-2xl font-semibold mb-4">1️⃣ Aircraft & Wing</h2>
+  <p>Aircraft specifications and wing details will be displayed here.</p>
+</section>
+
+<section class="mb-12">
+  <h2 class="text-2xl font-semibold mb-4">2️⃣ CAD Model</h2>
+  <p>The CAD model viewer will be integrated here.</p>
+</section>
+
+<section class="mb-12">
+  <h2 class="text-2xl font-semibold mb-4">3️⃣ Wing Load Calculation</h2>
+  <p>Wing load calculations and visualizations will be shown in this section.</p>
+</section>
+
+<section class="mb-12">
+  <h2 class="text-2xl font-semibold mb-4">4️⃣ Composite Materials</h2>
+  <p>Composite material properties and calculations will be displayed here.</p>
+</section>
+
+<section>
+  <h2 class="text-2xl font-semibold mb-4">5️⃣ Failure Criteria</h2>
+  <p>Failure criteria analysis will be shown in this section.</p>
+</section>
