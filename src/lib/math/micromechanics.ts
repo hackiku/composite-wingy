@@ -1,4 +1,4 @@
-// src/lib/calculations/micromechanics.ts
+// src/lib/math/micromechanics.ts
 
 interface MaterialProperties {
 	E1f: number;
