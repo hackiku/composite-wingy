@@ -6,7 +6,7 @@
 </script>
 
 <main class="p-8 space-y-12">
-  <h1 class="text-3xl font-bold mb-8">Composite Wing Analysis</h1>
+  <h1 class="text-3xl font-bold mb-8">Composite Wingy</h1>
 
   <section>
     <h2 class="text-2xl font-semibold mb-4">1️⃣ Aircraft & Wing</h2>
