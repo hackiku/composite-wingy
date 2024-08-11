@@ -4,7 +4,7 @@
   import { Button } from "$lib/components/ui/button";
 </script>
 
-<nav class="right-12">
+<nav class="absolute right-4 top-4 flex">
 	<Button on:click={toggleMode} variant="outline" size="icon">
 		<Sun
     class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
@@ -14,4 +14,6 @@
 		/>
 		<span class="sr-only">Toggle theme</span>
 	</Button>
+	<a href="/math">math</a>
+
 </nav>
