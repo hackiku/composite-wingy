@@ -1,15 +1,49 @@
 <!-- $lib/components/Sidebar.svelte -->
+
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
   import { Plane, Settings, Calculator } from 'lucide-svelte';
   import { Label } from "$lib/components/ui/label";
   import * as Select from "$lib/components/ui/select";
+  import { selectedAircraft } from '$lib/stores/aircraft';
+  import { fiberMaterial, matrixMaterial, fiberVolumeFraction, voidSpace } from '$lib/stores/materials';
+  import { aircraftPresets } from '$lib/data/aircraft-presets';
+  import { fibers, matrices } from '$lib/data/materials';
 
-  let selectedAircraft = 'P-51';
-  let fiberMaterial = 'T-300';
-  let matrixMaterial = '3501-6';
-  let fiberVolumeFraction = 0.55;
-  let voidSpace = 0.025;
+  // Local variables to bind to stores
+  let localSelectedAircraft;
+  let localFiberMaterial;
+  let localMatrixMaterial;
+  let localFiberVolumeFraction;
+  let localVoidSpace;
+
+  // Subscribe to stores
+  selectedAircraft.subscribe(value => localSelectedAircraft = value);
+  fiberMaterial.subscribe(value => localFiberMaterial = value);
+  matrixMaterial.subscribe(value => localMatrixMaterial = value);
+  fiberVolumeFraction.subscribe(value => localFiberVolumeFraction = value);
+  voidSpace.subscribe(value => localVoidSpace = value);
+
+  // Functions to update stores
+  function updateSelectedAircraft(value: string) {
+    selectedAircraft.set(value);
+  }
+
+  function updateFiberMaterial(value: string) {
+    fiberMaterial.set(value);
+  }
+
+  function updateMatrixMaterial(value: string) {
+    matrixMaterial.set(value);
+  }
+
+  function updateFiberVolumeFraction(value: number) {
+    fiberVolumeFraction.set(value);
+  }
+
+  function updateVoidSpace(value: number) {
+    voidSpace.set(value);
+  }
 </script>
 
 <aside class="w-64 p-4 border-r">
@@ -21,52 +55,53 @@
   <div class="space-y-4">
     <div>
       <Label for="aircraft">Aircraft</Label>
-      <Select.Root bind:value={selectedAircraft}>
+      <Select.Root value={localSelectedAircraft} onValueChange={updateSelectedAircraft}>
         <Select.Trigger class="w-full">
-          <Select.Value placeholder="Select aircraft" />
+          <Select.Value placeholder={localSelectedAircraft} />
         </Select.Trigger>
         <Select.Content>
-          <Select.Item value="P-51">P-51</Select.Item>
-          <Select.Item value="330-LT">330-LT</Select.Item>
-          <Select.Item value="Glider">Glider</Select.Item>
+          {#each Object.keys(aircraftPresets) as aircraft}
+            <Select.Item value={aircraft}>{aircraftPresets[aircraft].specs.name}</Select.Item>
+          {/each}
         </Select.Content>
       </Select.Root>
     </div>
 
     <div>
       <Label for="fiber">Fiber material</Label>
-      <Select.Root bind:value={fiberMaterial}>
+      <Select.Root value={localFiberMaterial} onValueChange={updateFiberMaterial}>
         <Select.Trigger class="w-full">
-          <Select.Value placeholder="Select fiber" />
+          <Select.Value placeholder={localFiberMaterial} />
         </Select.Trigger>
         <Select.Content>
-          <Select.Item value="T-300">T-300</Select.Item>
-          <Select.Item value="AS-4">AS-4</Select.Item>
-          <Select.Item value="IM7">IM7</Select.Item>
+          {#each Object.keys(fibers) as fiber}
+            <Select.Item value={fiber}>{fiber}</Select.Item>
+          {/each}
         </Select.Content>
       </Select.Root>
     </div>
 
     <div>
       <Label for="matrix">Matrix material</Label>
-      <Select.Root bind:value={matrixMaterial}>
+      <Select.Root value={localMatrixMaterial} onValueChange={updateMatrixMaterial}>
         <Select.Trigger class="w-full">
-          <Select.Value placeholder="Select matrix" />
+          <Select.Value placeholder={localMatrixMaterial} />
         </Select.Trigger>
         <Select.Content>
-          <Select.Item value="3501-6">3501-6</Select.Item>
-          <Select.Item value="977-3">977-3</Select.Item>
-          <Select.Item value="PEEK">PEEK</Select.Item>
+          {#each Object.keys(matrices) as matrix}
+            <Select.Item value={matrix}>{matrix}</Select.Item>
+          {/each}
         </Select.Content>
       </Select.Root>
     </div>
 
     <div>
-      <Label for="fvf">Fiber volume fraction: {fiberVolumeFraction.toFixed(2)}</Label>
+      <Label for="fvf">Fiber volume fraction: {localFiberVolumeFraction.toFixed(2)}</Label>
       <input
         type="range"
         id="fvf"
-        bind:value={fiberVolumeFraction}
+        value={localFiberVolumeFraction}
+        on:input={(e) => updateFiberVolumeFraction(parseFloat(e.currentTarget.value))}
         min="0"
         max="1"
         step="0.01"
@@ -75,11 +110,12 @@
     </div>
 
     <div>
-      <Label for="void">Void space: {voidSpace.toFixed(3)}</Label>
+      <Label for="void">Void space: {localVoidSpace.toFixed(3)}</Label>
       <input
         type="range"
         id="void"
-        bind:value={voidSpace}
+        value={localVoidSpace}
+        on:input={(e) => updateVoidSpace(parseFloat(e.currentTarget.value))}
         min="0"
         max="0.3"
         step="0.001"
