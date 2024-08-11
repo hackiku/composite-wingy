@@ -1,27 +1,37 @@
 <!-- src/routes/math/+page.svelte -->
-
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
   import { Label } from '$lib/components/ui/label';
   import * as Select from '$lib/components/ui/select';
+  import { micromechProperties, calculateProperty, type MaterialProperties, type CalculationResult } from '$lib/math/micromechanics';
 
-  // Placeholder for material properties
+  // Material selection
   let fiberMaterial = 'T-300';
   let matrixMaterial = '3501-6';
   let fiberVolumeFraction = 0.55;
   let voidSpace = 0.025;
 
-  // Placeholder for calculated properties
-  let E1 = 0;
-  let E2 = 0;
-  let G12 = 0;
-  let nu12 = 0;
+  // Material data
+  const materials: { [key: string]: MaterialProperties } = {
+    'T-300': { E1f: 230, E2f: 15, G12f: 15, ni12f: 0.2, Em: 0, Gm: 0, nim: 0 },
+    'AS-4': { E1f: 225, E2f: 15, G12f: 15, ni12f: 0.2, Em: 0, Gm: 0, nim: 0 },
+    'IM7': { E1f: 290, E2f: 21, G12f: 14, ni12f: 0.2, Em: 0, Gm: 0, nim: 0 },
+    '3501-6': { E1f: 0, E2f: 0, G12f: 0, ni12f: 0, Em: 4.2, Gm: 1.567, nim: 0.34 },
+    '977-3': { E1f: 0, E2f: 0, G12f: 0, ni12f: 0, Em: 3.7, Gm: 1.37, nim: 0.35 },
+    'PEEK': { E1f: 0, E2f: 0, G12f: 0, ni12f: 0, Em: 3.7, Gm: 4.65, nim: 0.35 }
+  };
+
+  let results: { [key: string]: CalculationResult[] } = {};
 
   function calculateProperties() {
-    // Placeholder for calculation logic
-    console.log('Calculating properties...');
-    // Here we'll implement the actual calculations later
+    const f = materials[fiberMaterial];
+    const m = materials[matrixMaterial];
+    const Vm = 1 - fiberVolumeFraction - voidSpace;
+
+    for (const property in micromechProperties) {
+      results[property] = calculateProperty(property, f, m, fiberVolumeFraction, Vm);
+    }
   }
 </script>
 
@@ -83,21 +93,22 @@
 
 <Button on:click={calculateProperties} class="w-full mb-4">Calculate Properties</Button>
 
-<div class="grid grid-cols-2 gap-4">
-  <div>
-    <Label for="E1">E1 (GPa)</Label>
-    <Input type="number" id="E1" bind:value={E1} readonly />
-  </div>
-  <div>
-    <Label for="E2">E2 (GPa)</Label>
-    <Input type="number" id="E2" bind:value={E2} readonly />
-  </div>
-  <div>
-    <Label for="G12">G12 (GPa)</Label>
-    <Input type="number" id="G12" bind:value={G12} readonly />
-  </div>
-  <div>
-    <Label for="nu12">nu12</Label>
-    <Input type="number" id="nu12" bind:value={nu12} readonly />
-  </div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  {#each Object.entries(results) as [property, calculations]}
+    <div class="border p-4 rounded-lg">
+      <h2 class="text-xl font-semibold mb-2">{micromechProperties[property].name} ({micromechProperties[property].unit})</h2>
+      <div class="space-y-2">
+        {#each calculations as calc}
+          <div>
+            <Label>{calc.theory}</Label>
+            <Input type="number" value={calc.value.toFixed(4)} readonly />
+          </div>
+        {/each}
+      </div>
+    </div>
+  {/each}
 </div>
+
+{#if Object.keys(results).length === 0}
+  <p class="text-center text-gray-500 mt-4">Click "Calculate Properties" to see results</p>
+{/if}
