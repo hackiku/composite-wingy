@@ -16,7 +16,7 @@
 
 <div class="mb-8">
     <h2 class="text-2xl font-semibold mb-4">Properties Summary</h2>
-    <div class="h-60 bg-gray-200 flex items-center justify-center">
+    <div class="h-60 bg-gray-400 bg-opacity-20 flex items-center justify-center">
         <p class="text-gray-500">Properties Comparison Graph Placeholder</p>
     </div>
 </div>

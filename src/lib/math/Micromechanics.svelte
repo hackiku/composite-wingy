@@ -1,29 +1,44 @@
 <!-- $lib/math/Micromechanics.svelte -->
-
 <script lang="ts">
-    import { fiberMaterial, matrixMaterial, fiberVolumeFraction, voidSpace } from '$lib/stores/materials';
-    import { Button } from '$lib/components/ui/button';
+    import { fiberMaterial, matrixMaterial, fiberVolumeFraction, voidSpace, micromechanicalProperties } from '$lib/stores/materials';
     import { Label } from "$lib/components/ui/label";
-    import * as Select from "$lib/components/ui/select";
+    import { RadioGroup, RadioGroupItem } from "$lib/components/ui/radio-group";
     import { micromechProperties, calculateProperty, type MaterialProperties } from './micromechanics';
     import katex from 'katex';
-
-    // You'll need to import or define these somewhere
     import { fibers, matrices } from '$lib/data/materials';
+    import { writable, derived } from 'svelte/store';
 
-    let selectedTheories = {};
+    let selectedTheories = writable({});
     Object.keys(micromechProperties).forEach(prop => {
-        selectedTheories[prop] = Object.keys(micromechProperties[prop].formulas)[0];
+        selectedTheories.update(theories => ({
+            ...theories,
+            [prop]: Object.keys(micromechProperties[prop].formulas)[0]
+        }));
     });
 
     $: Vm = 1 - $fiberVolumeFraction - $voidSpace;
     $: fiberProps = fibers[$fiberMaterial];
     $: matrixProps = matrices[$matrixMaterial];
 
+    $: selectedResults = derived(
+        [selectedTheories, micromechanicalProperties],
+        ([$selectedTheories, $micromechanicalProperties]) => {
+            const results = {};
+            for (const property in $selectedTheories) {
+                results[property] = $micromechanicalProperties[property][$selectedTheories[property]];
+            }
+            return results;
+        }
+    );
+
     function renderLatex(latex: string) {
         return katex.renderToString(latex, {
             throwOnError: false,
-            displayMode: true
+            displayMode: true,
+            trust: true,
+            strict: false,
+            maxSize: 50,
+            maxExpand: 1000
         });
     }
 </script>
@@ -33,39 +48,64 @@
         <div class="border p-4 rounded-lg">
             <h3 class="text-xl font-semibold mb-4">{details.name} ({property})</h3>
             
-            <Label for={`${property}-theory`}>Select Theory</Label>
-            <Select.Root 
-                value={selectedTheories[property]} 
-                onValueChange={(value) => selectedTheories[property] = value}
+            <Label>Select Theory</Label>
+            <RadioGroup 
+                class="flex flex-wrap gap-4 mb-4" 
+                value={$selectedTheories[property]}
+                onValueChange={(value) => selectedTheories.update(theories => ({ ...theories, [property]: value }))}
             >
-                <Select.Trigger class="w-full mb-4">
-                    <Select.Value placeholder="Select theory" />
-                </Select.Trigger>
-                <Select.Content>
-                    {#each Object.keys(details.formulas) as theory}
-                        <Select.Item value={theory}>{theory}</Select.Item>
-                    {/each}
-                </Select.Content>
-            </Select.Root>
+                {#each Object.keys(details.formulas) as theory}
+                    <div class="flex items-center space-x-2">
+                        <RadioGroupItem value={theory} id={`${property}-${theory}`} />
+                        <Label for={`${property}-${theory}`}>{theory}</Label>
+                    </div>
+                {/each}
+            </RadioGroup>
 
             <div class="mb-4">
                 <Label>Result</Label>
                 <div class="text-2xl font-bold">
-                    {calculateProperty(property, selectedTheories[property], fiberProps, matrixProps, $fiberVolumeFraction, Vm).toFixed(3)} {details.unit}
+                    {$selectedResults[property].toFixed(3)} {details.unit}
                 </div>
             </div>
 
             <div class="mb-4">
                 <Label>LaTeX Formula</Label>
-                <div class="p-2 rounded">
-                    {@html renderLatex(details.formulas[selectedTheories[property]].latex)}
+                <div class="overflow-x-none max-w-screen">
+                    {@html renderLatex(details.formulas[$selectedTheories[property]].latex)}
                 </div>
             </div>
 
             <div>
                 <Label>Description</Label>
-                <p>{details.formulas[selectedTheories[property]].description}</p>
+                <p>{details.formulas[$selectedTheories[property]].description}</p>
             </div>
         </div>
     {/each}
+</div>
+
+<div class="mt-8 overflow-x-auto">
+    <h3 class="text-xl font-semibold mb-4">Summary of All Theories</h3>
+    <table class="w-full border-collapse border">
+        <thead>
+            <tr>
+                <th class="border p-2">Property</th>
+                {#each Object.keys(micromechProperties['E1'].formulas) as theory}
+                    <th class="border p-2">{theory}</th>
+                {/each}
+            </tr>
+        </thead>
+        <tbody>
+            {#each Object.entries(micromechProperties) as [property, details]}
+                <tr>
+                    <td class="border p-2">{property}</td>
+                    {#each Object.keys(details.formulas) as theory}
+                        <td class="border p-2">
+                            {$micromechanicalProperties[property][theory].toFixed(3)} {details.unit}
+                        </td>
+                    {/each}
+                </tr>
+            {/each}
+        </tbody>
+    </table>
 </div>

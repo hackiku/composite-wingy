@@ -30,7 +30,17 @@ export const micromechanicalProperties = derived(
 		const results = {};
 
 		for (const property in micromechProperties) {
-			results[property] = calculateProperty(property, f, m, $compositeMaterial.Vf, $compositeMaterial.Vm);
+			results[property] = {};
+			for (const theory in micromechProperties[property].formulas) {
+				results[property][theory] = calculateProperty(
+					property,
+					theory,
+					f,
+					m,
+					$compositeMaterial.Vf,
+					$compositeMaterial.Vm
+				);
+			}
 		}
 
 		return results;
