@@ -1,140 +1,71 @@
 <!-- $lib/math/Micromechanics.svelte -->
+
 <script lang="ts">
-  import { createTable, Render, Subscribe, createRender } from "svelte-headless-table";
-  import { addSortBy, addTableFilter } from "svelte-headless-table/plugins";
-  import { readable } from "svelte/store";
-  import ArrowUpDown from "lucide-svelte/icons/arrow-up-down";
-  import * as Table from "$lib/components/ui/table";
-  import { Button } from "$lib/components/ui/button";
-  import { Input } from "$lib/components/ui/input";
-  import * as Select from "$lib/components/ui/select";
+    import { fiberMaterial, matrixMaterial, fiberVolumeFraction, voidSpace } from '$lib/stores/materials';
+    import { Button } from '$lib/components/ui/button';
+    import { Label } from "$lib/components/ui/label";
+    import * as Select from "$lib/components/ui/select";
+    import { micromechProperties, calculateProperty, type MaterialProperties } from './micromechanics';
+    import katex from 'katex';
 
-  type Property = {
-    name: string;
-    value: number;
-    unit: string;
-    theory: string;
-  };
+    // You'll need to import or define these somewhere
+    import { fibers, matrices } from '$lib/data/materials';
 
-  const data: Property[] = [
-    { name: "E1", value: 100, unit: "GPa", theory: "ROM" },
-    { name: "E2", value: 50, unit: "GPa", theory: "Chamis" },
-    { name: "G12", value: 25, unit: "GPa", theory: "Hashin-Rosen" },
-    { name: "nu12", value: 0.25, unit: "-", theory: "ROM" },
-  ];
+    let selectedTheories = {};
+    Object.keys(micromechProperties).forEach(prop => {
+        selectedTheories[prop] = Object.keys(micromechProperties[prop].formulas)[0];
+    });
 
-  const theories = {
-    E1: ['ROM', 'Inverse ROM', 'Halpin-Tsai'],
-    E2: ['ROM', 'Chamis', 'Halpin-Tsai'],
-    G12: ['ROM', 'Chamis', 'Hashin-Rosen'],
-    nu12: ['ROM', 'Chamis', 'Halpin-Tsai']
-  };
+    $: Vm = 1 - $fiberVolumeFraction - $voidSpace;
+    $: fiberProps = fibers[$fiberMaterial];
+    $: matrixProps = matrices[$matrixMaterial];
 
-  const table = createTable(readable(data), {
-    sort: addSortBy({ disableMultiSort: true }),
-    filter: addTableFilter({
-      fn: ({ filterValue, value }) => value.toLowerCase().includes(filterValue.toLowerCase()),
-    }),
-  });
-
-  const columns = table.createColumns([
-    table.column({
-      accessor: "name",
-      header: "Property",
-    }),
-    table.column({
-      accessor: "value",
-      header: "Value",
-    }),
-    table.column({
-      accessor: "unit",
-      header: "Unit",
-    }),
-    table.column({
-      accessor: "theory",
-      header: "Theory",
-      cell: ({ value, row }) => {
-        return createRender(Select.Root, {
-          value: value,
-          onSelectedChange: (newTheory) => {
-            // Here you would update the theory for this property
-            console.log(`Updating theory for ${row.name} to ${newTheory}`);
-          }
-        }, [
-          createRender(Select.Trigger, {}, [
-            createRender(Select.Value, { placeholder: "Select theory" })
-          ]),
-          createRender(Select.Content, {}, 
-            theories[row.name].map(theory => 
-              createRender(Select.Item, { value: theory }, [theory])
-            )
-          )
-        ]);
-      }
-    }),
-  ]);
-
-  const { headerRows, rows, tableAttrs, tableBodyAttrs, pluginStates } = table.createViewModel(columns);
-
-  const { filterValue } = pluginStates.filter;
+    function renderLatex(latex: string) {
+        return katex.renderToString(latex, {
+            throwOnError: false,
+            displayMode: true
+        });
+    }
 </script>
 
-<div>
-  <div class="flex items-center py-4">
-    <Input
-      class="max-w-sm"
-      placeholder="Filter properties..."
-      type="text"
-      bind:value={$filterValue}
-    />
-  </div>
-  <div class="rounded-md border">
-    <Table.Root {...$tableAttrs}>
-      <Table.Header>
-        {#each $headerRows as headerRow}
-          <Subscribe rowAttrs={headerRow.attrs()}>
-            <Table.Row>
-              {#each headerRow.cells as cell (cell.id)}
-                <Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
-                  <Table.Head {...attrs}>
-                    {#if cell.id !== "theory"}
-                      <Button variant="ghost" on:click={props.sort.toggle}>
-                        <Render of={cell.render()} />
-                        <ArrowUpDown class="ml-2 h-4 w-4" />
-                      </Button>
-                    {:else}
-                      <Render of={cell.render()} />
-                    {/if}
-                  </Table.Head>
-                </Subscribe>
-              {/each}
-            </Table.Row>
-          </Subscribe>
-        {/each}
-      </Table.Header>
-      <Table.Body {...$tableBodyAttrs}>
-        {#each $rows as row (row.id)}
-          <Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-            <Table.Row {...rowAttrs}>
-              {#each row.cells as cell (cell.id)}
-                <Subscribe attrs={cell.attrs()} let:attrs>
-                  <Table.Cell {...attrs}>
-                    <Render of={cell.render()} />
-                  </Table.Cell>
-                </Subscribe>
-              {/each}
-            </Table.Row>
-          </Subscribe>
-        {/each}
-      </Table.Body>
-    </Table.Root>
-  </div>
-</div>
+<div class="space-y-8">
+    {#each Object.entries(micromechProperties) as [property, details]}
+        <div class="border p-4 rounded-lg">
+            <h3 class="text-xl font-semibold mb-4">{details.name} ({property})</h3>
+            
+            <Label for={`${property}-theory`}>Select Theory</Label>
+            <Select.Root 
+                value={selectedTheories[property]} 
+                onValueChange={(value) => selectedTheories[property] = value}
+            >
+                <Select.Trigger class="w-full mb-4">
+                    <Select.Value placeholder="Select theory" />
+                </Select.Trigger>
+                <Select.Content>
+                    {#each Object.keys(details.formulas) as theory}
+                        <Select.Item value={theory}>{theory}</Select.Item>
+                    {/each}
+                </Select.Content>
+            </Select.Root>
 
-<div class="mt-4">
-  <Button class="w-full">Recalculate Properties</Button>
-</div>
+            <div class="mb-4">
+                <Label>Result</Label>
+                <div class="text-2xl font-bold">
+                    {calculateProperty(property, selectedTheories[property], fiberProps, matrixProps, $fiberVolumeFraction, Vm).toFixed(3)} {details.unit}
+                </div>
+            </div>
 
-<div class="mt-4 h-60 bg-gray-200 flex items-center justify-center">
-  <p class="text-gray-500">Properties Visualization Placeholder</p>
+            <div class="mb-4">
+                <Label>LaTeX Formula</Label>
+                <div class="p-2 rounded">
+                    {@html renderLatex(details.formulas[selectedTheories[property]].latex)}
+                </div>
+            </div>
+
+            <div>
+                <Label>Description</Label>
+                <p>{details.formulas[selectedTheories[property]].description}</p>
+            </div>
+        </div>
+    {/each}
 </div>

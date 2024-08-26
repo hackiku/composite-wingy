@@ -1,6 +1,6 @@
-// src/lib/math/micromechanics.ts
+// $lib/math/micromechanics.ts
 
-interface MaterialProperties {
+export interface MaterialProperties {
 	E1f: number;
 	E2f: number;
 	G12f: number;
@@ -10,7 +10,7 @@ interface MaterialProperties {
 	nim: number;
 }
 
-interface CalculationResult {
+export interface CalculationResult {
 	value: number;
 	theory: string;
 }
@@ -23,26 +23,30 @@ interface PropertyCalculation {
 	formulas: {
 		[key: string]: {
 			formula: Formula;
+			latex: string;
 			description: string;
 		}
 	}
 }
 
-const micromechProperties: { [key: string]: PropertyCalculation } = {
+export const micromechProperties: { [key: string]: PropertyCalculation } = {
 	E1: {
 		name: "Young's longitudinal modulus",
 		unit: "GPa",
 		formulas: {
 			ROM: {
 				formula: (f, m, Vf, Vm) => f.E1f * Vf + m.Em * Vm,
+				latex: "E_1 = E_{1f}V_f + E_mV_m",
 				description: "Rule of Mixtures"
 			},
 			"Inverse ROM": {
 				formula: (f, m, Vf, Vm) => 1 / (Vf / f.E1f + Vm / m.Em),
+				latex: "\\frac{1}{E_1} = \\frac{V_f}{E_{1f}} + \\frac{V_m}{E_m}",
 				description: "Inverse Rule of Mixtures"
 			},
 			"Halpin-Tsai": {
 				formula: (f, m, Vf, Vm) => (f.E1f * m.Em) / (Vf * m.Em + Vm * f.E1f),
+				latex: "E_1 = \\frac{E_{1f} \\cdot E_m}{V_f \\cdot E_m + V_m \\cdot E_{1f}}",
 				description: "Halpin-Tsai equation"
 			}
 		}
@@ -53,10 +57,12 @@ const micromechProperties: { [key: string]: PropertyCalculation } = {
 		formulas: {
 			ROM: {
 				formula: (f, m, Vf, Vm) => (f.E2f * m.Em) / (Vf * m.Em + Vm * f.E2f),
+				latex: "E_2 = \\frac{E_{2f} \\cdot E_m}{E_m \\cdot V_f + E_{2f} \\cdot V_m}",
 				description: "Rule of Mixtures"
 			},
 			Chamis: {
 				formula: (f, m, Vf, Vm) => m.Em / (1 - Math.sqrt(Vf) * (1 - m.Em / f.E2f)),
+				latex: "E_2 = \\frac{E_m}{1 - \\sqrt{V_f} \\left( 1 - \\frac{E_m}{E_{2f}} \\right)}",
 				description: "Chamis model"
 			}
 		}
@@ -64,16 +70,14 @@ const micromechProperties: { [key: string]: PropertyCalculation } = {
 	// Add G12 and nu12 properties here...
 };
 
-function calculateProperty(property: string, f: MaterialProperties, m: MaterialProperties, Vf: number, Vm: number): CalculationResult[] {
-	const calculations = micromechProperties[property];
-	if (!calculations) {
+export function calculateProperty(property: string, theory: string, f: MaterialProperties, m: MaterialProperties, Vf: number, Vm: number): number {
+	const propertyCalc = micromechProperties[property];
+	if (!propertyCalc) {
 		throw new Error(`Unknown property: ${property}`);
 	}
-
-	return Object.entries(calculations.formulas).map(([theory, { formula }]) => ({
-		value: formula(f, m, Vf, Vm),
-		theory
-	}));
+	const theoryCalc = propertyCalc.formulas[theory];
+	if (!theoryCalc) {
+		throw new Error(`Unknown theory for ${property}: ${theory}`);
+	}
+	return theoryCalc.formula(f, m, Vf, Vm);
 }
-
-export { micromechProperties, calculateProperty, MaterialProperties, CalculationResult };
