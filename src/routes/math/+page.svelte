@@ -1,4 +1,5 @@
 <!-- src/routes/math/+page.svelte -->
+
 <script lang="ts">
     import Micromechanics from '$lib/math/Micromechanics.svelte';
     import { fiberMaterial, matrixMaterial, fiberVolumeFraction, voidSpace } from '$lib/stores/materials';
@@ -22,3 +23,5 @@
 </div>
 
 <Micromechanics />
+
+

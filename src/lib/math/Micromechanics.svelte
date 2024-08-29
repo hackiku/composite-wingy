@@ -48,7 +48,7 @@
         <div class="border p-4 rounded-lg">
             <h3 class="text-xl font-semibold mb-4">{details.name} ({property})</h3>
             
-            <Label>Select Theory</Label>
+            <Label>Model</Label>
             <RadioGroup 
                 class="flex flex-wrap gap-4 mb-4" 
                 value={$selectedTheories[property]}
@@ -63,14 +63,13 @@
             </RadioGroup>
 
             <div class="mb-4">
-                <Label>Result</Label>
+                <!-- <Label>Result</Label> -->
                 <div class="text-2xl font-bold">
                     {$selectedResults[property].toFixed(3)} {details.unit}
                 </div>
             </div>
 
             <div class="mb-4">
-                <Label>LaTeX Formula</Label>
                 <div class="overflow-x-none max-w-screen">
                     {@html renderLatex(details.formulas[$selectedTheories[property]].latex)}
                 </div>
