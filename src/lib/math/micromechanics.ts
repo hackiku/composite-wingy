@@ -58,7 +58,7 @@ export const micromechProperties: { [key: string]: PropertyCalculation } = {
 				},
 				latex: "E_1 = E_{f1}V_f + E_mV_m + \\frac{4K_f K_m G_m V_f V_m (\\nu_m - \\nu_{f12})^2}{K_f K_m + G_m (V_f K_f + V_m K_m)}",
 				description: "Hashin-Rosen model"
-			}
+			},
 		}
 	},
 	E2: {
@@ -88,7 +88,7 @@ export const micromechProperties: { [key: string]: PropertyCalculation } = {
 				},
 				latex: "E_2 = \\frac{1}{\\frac{\\eta_f V_f}{E_{2f}} + \\frac{\\eta_m V_m}{E_m}}",
 				description: "Modified Inverse Rule of Mixtures"
-			}
+			},
 		}
 	},
 	G12: {
@@ -101,7 +101,10 @@ export const micromechProperties: { [key: string]: PropertyCalculation } = {
 				description: "Rule of Mixtures"
 			},
 			MROM: {
-				formula: (f, m, Vf, Vm) => 1 / ((Vf / f.G12f) + (0.6 * Vm / m.Gm)),
+				formula: (f, m, Vf, Vm) => {
+					const eta_prime = 0.6; // This is a simplification, you might want to calculate this
+					return 1 / ((Vf / f.G12f) + (eta_prime * Vm / m.Gm));
+				},
 				latex: "\\frac{1}{G_{12}} = \\frac{V_f}{G_{12f}} + \\frac{\\eta' V_m}{G_m}",
 				description: "Modified Rule of Mixtures"
 			},
@@ -127,7 +130,7 @@ export const micromechProperties: { [key: string]: PropertyCalculation } = {
 				},
 				latex: "G_{12} = G_m \\left( \\frac{1 + 2 \\cdot \\xi \\cdot V_f}{1 - \\xi \\cdot V_f} \\right)",
 				description: "Halpin-Tsai equation"
-			}
+			},
 		}
 	},
 	nu12: {
@@ -142,7 +145,7 @@ export const micromechProperties: { [key: string]: PropertyCalculation } = {
 			Chamis: {
 				formula: (f, m, Vf, Vm) => f.ni12f * Vf + m.nim * Vm,
 				latex: "\\nu_{12} = \\nu_{12f}V_f + \\nu_mV_m",
-				description: "Chamis model (same as ROM)"
+				description: "Chamis model (same as ROM for this property)"
 			},
 			"Halpin-Tsai": {
 				formula: (f, m, Vf, Vm) => (f.ni12f * m.nim) / (Vf * m.nim + Vm * f.ni12f),
@@ -150,9 +153,25 @@ export const micromechProperties: { [key: string]: PropertyCalculation } = {
 				description: "Halpin-Tsai equation"
 			}
 		}
+	},
+	nu21: {
+		name: "Poisson's minor ratio",
+		unit: "-",
+		formulas: {
+			"Stiffness matrix symmetry": {
+				formula: (f, m, Vf, Vm) => {
+					const E1 = f.E1f * Vf + m.Em * Vm; // ROM for E1
+					const E2 = m.Em / (1 - Math.sqrt(Vf) * (1 - m.Em / f.E2f)); // Chamis for E2
+					const nu12 = f.ni12f * Vf + m.nim * Vm; // ROM for nu12
+					return (E2 / E1) * nu12;
+				},
+				latex: "\\nu_{21} = \\frac{E_2}{E_1} \\nu_{12}",
+				description: "Calculated using stiffness matrix symmetry"
+			}
+		}
 	}
-};
 
+};
 
 export function calculateProperty(property: string, theory: string, f: MaterialProperties, m: MaterialProperties, Vf: number, Vm: number): number {
 	const propertyCalc = micromechProperties[property];

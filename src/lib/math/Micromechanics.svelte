@@ -73,16 +73,17 @@
     return `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.6)`;
   }
 
-  function renderLatex(latex: string) {
+    function renderLatex(latex: string) {
     return katex.renderToString(latex, {
       throwOnError: false,
       displayMode: true,
       trust: true,
       strict: false,
       maxSize: 50,
-      maxExpand: 1000,
+      maxExpand: 10,
     });
   }
+
 </script>
 
 <div class="space-y-8">
@@ -148,7 +149,9 @@
       <div class="mb-4">
         <div class="overflow-x-auto">
           <!-- {@html renderLatex(details.formulas[$selectedTheories[property]].latex)} -->
-          {@html renderLatex(details.formulas[$selectedTheories[property]].lateaa)}
+          <!-- {@html renderLatex(details.formulas[$selectedTheories[property]].latex)} -->
+	        <div>{@html renderLatex(details.formulas[$selectedTheories[property]].latex)}</div>
+
         </div>
       </div>
     </div>
