@@ -4,11 +4,16 @@
   import { Button } from '$lib/components/ui/button';
   import { Plane, Settings, Calculator } from 'lucide-svelte';
   import { Label } from "$lib/components/ui/label";
+	import { Checkbox } from "$lib/components/ui/checkbox";
+
   import * as Select from "$lib/components/ui/select";
   import { selectedAircraft } from '$lib/stores/aircraft';
-  import { materialStore, setFiber, setMatrix, setVf, setVvoid } from '$lib/stores/materialStore';
-  import { aircraftPresets } from '$lib/data/aircraft-presets';
+  // data
+	import { aircraftPresets } from '$lib/data/aircraft-presets';
   import { fibers, matrices } from '$lib/data/materials';
+  // stores
+	import { materialStore, setFiber, setMatrix, setVf, setVvoid } from '$lib/stores/materialStore';
+	import { uiStore } from '$lib/stores/uiStore';
 
   // Use $store syntax for auto-subscribing
   $: material = $materialStore;
@@ -33,7 +38,8 @@
 
 <aside class="w-64 h-screen overflow-hidden">
   <div class="fixed w-64 h-full overflow-y-auto p-4 border-r">
-    <h2 class="text-lg font-semibold mb-4 flex items-center">
+    
+		<h2 class="text-lg font-semibold mb-4 flex items-center">
       <Plane class="mr-2 h-5 w-5" />
       Composite Wingy
     </h2>
@@ -119,5 +125,19 @@
         Export to Femap
       </Button>
     </div>
+
+
+		<div class="mt-4 border-t pt-4">
+			<div class="flex items-center space-x-2">
+				<Checkbox 
+					id="show-graphs" 
+					checked={$uiStore.showGraphs} 
+					onCheckedChange={(checked) => uiStore.update(store => ({ ...store, showGraphs: checked }))}
+				/>
+				<Label for="show-graphs">Show graphs</Label>
+			</div>
+		</div>
+
+
   </div>
 </aside>

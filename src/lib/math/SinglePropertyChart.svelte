@@ -6,8 +6,8 @@
   import { micromechProperties, type MaterialProperties } from "./micromechanics";
 
   export let property: string;
-  export let fiber: MaterialProperties;
-  export let matrix: MaterialProperties;
+  export let fiber: MaterialProperties | undefined;
+  export let matrix: MaterialProperties | undefined;
   export let currentVf: number;
 
   let canvas: HTMLCanvasElement;
@@ -17,7 +17,7 @@
 
   onMount(() => {
     const ctx = canvas.getContext('2d');
-    if (ctx) {
+    if (ctx && fiber && matrix) {
       createChart(ctx);
     }
     return () => {
@@ -26,6 +26,8 @@
   });
 
   function createChart(ctx: CanvasRenderingContext2D) {
+    if (!fiber || !matrix) return;
+
     const vfValues = Array.from({ length: 101 }, (_, i) => i / 100);
     const datasets = Object.entries(theories).map(([name, theory]) => ({
       label: name,
@@ -110,6 +112,10 @@
   }
 </script>
 
-<div class="chart-container" style="position: relative; height:300px; width:100%">
-  <canvas bind:this={canvas}></canvas>
-</div>
+{#if fiber && matrix}
+  <div class="chart-container" style="position: relative; height:300px; width:100%">
+    <canvas bind:this={canvas}></canvas>
+  </div>
+{:else}
+  <p>Loading chart...</p>
+{/if}

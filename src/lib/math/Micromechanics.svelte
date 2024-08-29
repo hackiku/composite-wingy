@@ -2,6 +2,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { materialStore, compositeMaterial, micromechanicalProperties } from "$lib/stores/materialStore";
+  import { uiStore } from "$lib/stores/uiStore";
   import { micromechProperties } from "./micromechanics";
   import { Label } from "$lib/components/ui/label";
   import { RadioGroup, RadioGroupItem } from "$lib/components/ui/radio-group";
@@ -137,10 +138,12 @@
 			
 			</div>
 
-			<div class="bg-gray-500 w-1/2">
-
-			</div>
-
-    </div>
+			{#if $uiStore.showGraphs}
+				<div class="bg-gray-500 opacity-30 w-1/2 p-20">
+					<p class="opacity-30">single property chart</p>
+				</div>
+			{/if}
+    
+		</div>
   {/each}
 </div>
