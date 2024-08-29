@@ -17,7 +17,7 @@ export const voidSpace = writable(0.025);
 export const compositeMaterial = derived(
   [fiberMaterial, matrixMaterial, fiberVolumeFraction, voidSpace],
   ([$fiberMaterial, $matrixMaterial, $fiberVolumeFraction, $voidSpace]) => {
-    const Vm = 1 - $fiberVolumeFraction - $voidSpace;
+    const Vm = 1 - $fiberVolumeFraction;
     return {
       name: `${$fiberMaterial}/${$matrixMaterial}, Vf=${$fiberVolumeFraction.toFixed(2)}`,
       fiber: $fiberMaterial,
