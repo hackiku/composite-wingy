@@ -1,7 +1,7 @@
 <!-- src/routes/math/+page.svelte -->
 
 <script lang="ts">
-    // import Micromechanics from '$lib/math/Micromechanics.svelte';
+    import Micromechanics from '$lib/math/Micromechanics.svelte';
     import { materialStore, compositeMaterial, micromechanicalProperties, setFiber, setMatrix, setVf, setVvoid } from '$lib/stores/materialStore';
     import { fibers, matrices } from '$lib/data/materials';
 
@@ -61,5 +61,5 @@
     </div>
 </div>
 
-<!-- Micromechanics component commented out as requested -->
-<!-- <Micromechanics /> -->
+
+<Micromechanics />

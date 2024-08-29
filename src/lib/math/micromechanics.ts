@@ -17,7 +17,7 @@ export interface CalculationResult {
 
 type Formula = (f: MaterialProperties, m: MaterialProperties, Vf: number, Vm: number) => number;
 
-interface PropertyCalculation {
+export interface PropertyCalculation {
 	name: string;
 	unit: string;
 	formulas: {
@@ -80,4 +80,15 @@ export function calculateProperty(property: string, theory: string, f: MaterialP
 		throw new Error(`Unknown theory for ${property}: ${theory}`);
 	}
 	return theoryCalc.formula(f, m, Vf, Vm);
+}
+
+export function calculateAllProperties(f: MaterialProperties, m: MaterialProperties, Vf: number, Vm: number): { [key: string]: { [key: string]: number } } {
+	const results: { [key: string]: { [key: string]: number } } = {};
+	for (const [property, details] of Object.entries(micromechProperties)) {
+		results[property] = {};
+		for (const theory of Object.keys(details.formulas)) {
+			results[property][theory] = calculateProperty(property, theory, f, m, Vf, Vm);
+		}
+	}
+	return results;
 }
