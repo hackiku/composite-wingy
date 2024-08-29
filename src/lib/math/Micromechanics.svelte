@@ -1,12 +1,11 @@
 <!-- $lib/math/Micromechanics.svelte -->
 <script lang="ts">
-    import { fiberMaterial, matrixMaterial, fiberVolumeFraction, voidSpace, micromechanicalProperties } from '$lib/stores/materials';
+    import { materialStore } from '$lib/stores/materialStore';
     import { Label } from "$lib/components/ui/label";
     import { RadioGroup, RadioGroupItem } from "$lib/components/ui/radio-group";
-    import { micromechProperties, calculateProperty, type MaterialProperties } from './micromechanics';
+    import { micromechProperties } from './micromechanics';
     import katex from 'katex';
-    import { fibers, matrices } from '$lib/data/materials';
-    import { writable, derived } from 'svelte/store';
+    import { writable } from 'svelte/store';
 
     let selectedTheories = writable({});
     Object.keys(micromechProperties).forEach(prop => {
@@ -16,20 +15,7 @@
         }));
     });
 
-    $: Vm = 1 - $fiberVolumeFraction - $voidSpace;
-    $: fiberProps = fibers[$fiberMaterial];
-    $: matrixProps = matrices[$matrixMaterial];
-
-    $: selectedResults = derived(
-        [selectedTheories, micromechanicalProperties],
-        ([$selectedTheories, $micromechanicalProperties]) => {
-            const results = {};
-            for (const property in $selectedTheories) {
-                results[property] = $micromechanicalProperties[property][$selectedTheories[property]];
-            }
-            return results;
-        }
-    );
+    $: ({ composite, properties } = $materialStore);
 
     function renderLatex(latex: string) {
         return katex.renderToString(latex, {
@@ -47,7 +33,7 @@
     {#each Object.entries(micromechProperties) as [property, details]}
         <div class="border p-4 rounded-lg">
             <h3 class="text-xl font-semibold mb-4">{details.name} ({property})</h3>
-            
+
             <Label>Model</Label>
             <RadioGroup 
                 class="flex flex-wrap gap-4 mb-4" 
@@ -63,9 +49,8 @@
             </RadioGroup>
 
             <div class="mb-4">
-                <!-- <Label>Result</Label> -->
                 <div class="text-2xl font-bold">
-                    {$selectedResults[property].toFixed(3)} {details.unit}
+                    {properties[property][$selectedTheories[property]].toFixed(3)} {details.unit}
                 </div>
             </div>
 
@@ -100,7 +85,7 @@
                     <td class="border p-2">{property}</td>
                     {#each Object.keys(details.formulas) as theory}
                         <td class="border p-2">
-                            {$micromechanicalProperties[property][theory].toFixed(3)} {details.unit}
+                            {properties[property][theory].toFixed(3)} {details.unit}
                         </td>
                     {/each}
                 </tr>

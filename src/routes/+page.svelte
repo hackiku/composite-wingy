@@ -3,13 +3,13 @@
 <script lang="ts">
 	import WingLoadCalculator from '$lib/math/WingLoadCalculator.svelte';
   import CADViewer from '$lib/cad/CADViewer.svelte';
-	import Micromechanics from '$lib/math/Micromechanics.svelte';
+	// import Micromechanics from '$lib/math/Micromechanics.svelte';
 </script>
 
 <main class="p-8 space-y-12">
   <h1 class="text-3xl font-bold mb-8">Composite Wingy</h1>
 
-  <Micromechanics />
+  <!-- <Micromechanics /> -->
 
 
   <section>

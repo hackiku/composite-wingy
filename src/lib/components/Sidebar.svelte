@@ -6,43 +6,28 @@
   import { Label } from "$lib/components/ui/label";
   import * as Select from "$lib/components/ui/select";
   import { selectedAircraft } from '$lib/stores/aircraft';
-  import { fiberMaterial, matrixMaterial, fiberVolumeFraction, voidSpace } from '$lib/stores/materials';
+  import { materialStore, setFiber, setMatrix, setVf, setVvoid } from '$lib/stores/materialStore';
   import { aircraftPresets } from '$lib/data/aircraft-presets';
   import { fibers, matrices } from '$lib/data/materials';
 
-  // Local variables to bind to stores
-  let localSelectedAircraft;
-  let localFiberMaterial;
-  let localMatrixMaterial;
-  let localFiberVolumeFraction;
-  let localVoidSpace;
+  // Use $store syntax for auto-subscribing
+  $: material = $materialStore;
 
-  // Subscribe to stores
-  selectedAircraft.subscribe(value => localSelectedAircraft = value);
-  fiberMaterial.subscribe(value => localFiberMaterial = value);
-  matrixMaterial.subscribe(value => localMatrixMaterial = value);
-  fiberVolumeFraction.subscribe(value => localFiberVolumeFraction = value);
-  voidSpace.subscribe(value => localVoidSpace = value);
+  // Create selected objects for Select components
+  $: selectedAircraftObj = { value: $selectedAircraft, label: aircraftPresets[$selectedAircraft].specs.name };
+  $: selectedFiberObj = { value: material.fiber, label: material.fiber };
+  $: selectedMatrixObj = { value: material.matrix, label: material.matrix };
 
-  // Functions to update stores
-  function updateSelectedAircraft(value: string) {
-    selectedAircraft.set(value);
+  function updateSelectedAircraft(selected: { value: string, label: string }) {
+    selectedAircraft.set(selected.value);
   }
 
-  function updateFiberMaterial(value: string) {
-    fiberMaterial.set(value);
+  function updateFiberMaterial(selected: { value: string, label: string }) {
+    setFiber(selected.value);
   }
 
-  function updateMatrixMaterial(value: string) {
-    matrixMaterial.set(value);
-  }
-
-  function updateFiberVolumeFraction(value: number) {
-    fiberVolumeFraction.set(value);
-  }
-
-  function updateVoidSpace(value: number) {
-    voidSpace.set(value);
+  function updateMatrixMaterial(selected: { value: string, label: string }) {
+    setMatrix(selected.value);
   }
 </script>
 
@@ -51,17 +36,17 @@
     <Plane class="mr-2 h-5 w-5" />
     Composite Wingy
   </h2>
-  
+
   <div class="space-y-4">
     <div>
       <Label for="aircraft">Aircraft</Label>
-      <Select.Root value={localSelectedAircraft} onValueChange={updateSelectedAircraft}>
+      <Select.Root selected={selectedAircraftObj} onSelectedChange={updateSelectedAircraft}>
         <Select.Trigger class="w-full">
-          <Select.Value placeholder={localSelectedAircraft} />
+          <Select.Value placeholder="Select aircraft" />
         </Select.Trigger>
         <Select.Content>
-          {#each Object.keys(aircraftPresets) as aircraft}
-            <Select.Item value={aircraft}>{aircraftPresets[aircraft].specs.name}</Select.Item>
+          {#each Object.entries(aircraftPresets) as [key, aircraft]}
+            <Select.Item value={key}>{aircraft.specs.name}</Select.Item>
           {/each}
         </Select.Content>
       </Select.Root>
@@ -69,9 +54,9 @@
 
     <div>
       <Label for="fiber">Fiber material</Label>
-      <Select.Root value={localFiberMaterial} onValueChange={updateFiberMaterial}>
+      <Select.Root selected={selectedFiberObj} onSelectedChange={updateFiberMaterial}>
         <Select.Trigger class="w-full">
-          <Select.Value placeholder={localFiberMaterial} />
+          <Select.Value placeholder="Select fiber" />
         </Select.Trigger>
         <Select.Content>
           {#each Object.keys(fibers) as fiber}
@@ -83,9 +68,9 @@
 
     <div>
       <Label for="matrix">Matrix material</Label>
-      <Select.Root value={localMatrixMaterial} onValueChange={updateMatrixMaterial}>
+      <Select.Root selected={selectedMatrixObj} onSelectedChange={updateMatrixMaterial}>
         <Select.Trigger class="w-full">
-          <Select.Value placeholder={localMatrixMaterial} />
+          <Select.Value placeholder="Select matrix" />
         </Select.Trigger>
         <Select.Content>
           {#each Object.keys(matrices) as matrix}
@@ -96,12 +81,12 @@
     </div>
 
     <div>
-      <Label for="fvf">Fiber volume fraction: {localFiberVolumeFraction.toFixed(2)}</Label>
+      <Label for="fvf">Fiber volume fraction: {material.Vf.toFixed(2)}</Label>
       <input
         type="range"
         id="fvf"
-        value={localFiberVolumeFraction}
-        on:input={(e) => updateFiberVolumeFraction(parseFloat(e.currentTarget.value))}
+        bind:value={material.Vf}
+        on:input={() => setVf(material.Vf)}
         min="0"
         max="1"
         step="0.01"
@@ -110,12 +95,12 @@
     </div>
 
     <div>
-      <Label for="void">Void space: {localVoidSpace.toFixed(3)}</Label>
+      <Label for="void">Void space: {material.Vvoid.toFixed(3)}</Label>
       <input
         type="range"
         id="void"
-        value={localVoidSpace}
-        on:input={(e) => updateVoidSpace(parseFloat(e.currentTarget.value))}
+        bind:value={material.Vvoid}
+        on:input={() => setVvoid(material.Vvoid)}
         min="0"
         max="0.3"
         step="0.001"
