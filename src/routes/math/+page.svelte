@@ -16,6 +16,7 @@
   <p>Matrix: {composite.matrix}</p>
   <p>Fiber Volume Fraction: {composite.Vf.toFixed(3)}</p>
   <p>Void Space: {composite.Vvoid.toFixed(3)}</p>
+  <p>Composite Material: {composite.name}</p>
 </div>
 
 <Micromechanics />

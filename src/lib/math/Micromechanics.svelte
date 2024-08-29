@@ -6,8 +6,8 @@
   import { micromechProperties } from "./micromechanics";
   import { Label } from "$lib/components/ui/label";
   import { RadioGroup, RadioGroupItem } from "$lib/components/ui/radio-group";
-  import katex from "katex";
   import { writable } from "svelte/store";
+  import Katex from "./Katex.svelte";
 
   let chartCanvas: HTMLCanvasElement;
   let chart: Chart;
@@ -72,18 +72,6 @@
   function getRandomColor() {
     return `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.6)`;
   }
-
-    function renderLatex(latex: string) {
-    return katex.renderToString(latex, {
-      throwOnError: false,
-      displayMode: true,
-      trust: true,
-      strict: false,
-      maxSize: 50,
-      maxExpand: 10,
-    });
-  }
-
 </script>
 
 <div class="space-y-8">
@@ -148,10 +136,7 @@
 
       <div class="mb-4">
         <div class="overflow-x-auto">
-          <!-- {@html renderLatex(details.formulas[$selectedTheories[property]].latex)} -->
-          <!-- {@html renderLatex(details.formulas[$selectedTheories[property]].latex)} -->
-	        <div>{@html renderLatex(details.formulas[$selectedTheories[property]].latex)}</div>
-
+          <Katex math={details.formulas[$selectedTheories[property]].latex} displayMode={true} />
         </div>
       </div>
     </div>
