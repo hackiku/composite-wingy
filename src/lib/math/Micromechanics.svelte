@@ -7,8 +7,10 @@
   import { RadioGroup, RadioGroupItem } from "$lib/components/ui/radio-group";
   import { writable } from "svelte/store";
   import * as Tabs from "$lib/components/ui/tabs";
-  import Katex from "./Katex.svelte";
+
+	import Katex from "./Katex.svelte";
   import PropertiesChart from "./PropertiesChart.svelte";
+  import SinglePropertyChart from "./PropertiesChart.svelte";
 
   let selectedTheories = writable({});
   Object.keys(micromechProperties).forEach((prop) => {
@@ -95,39 +97,50 @@
   </Tabs.Root>
 
   {#each Object.entries(micromechProperties) as [property, details]}
-    <div class="border p-4 rounded-lg">
-      <h3 class="text-xl font-semibold mb-4">{details.name} ({property})</h3>
+    <div class="border p-4 rounded-lg dark:bg-gray-950 flex flex-col md:flex-row gap-8 justify-between">
+      
+      <div class="flex flex-col">
+				<div class="mb-4">
+					<div class="text-3xl font-bold">
+									{properties[property][$selectedTheories[property]].toFixed(3)}
+						<span class="font-normal opacity-55">[{details.unit}] </span>
+					</div>
+				</div>
+				
+				<h3 class="text-xl font-semibold mb-4">{details.name} ({property})</h3>
+				
+				<div class="mb-2">
+					<Label>Model</Label>
+				</div>
+				
+				<RadioGroup
+					class="flex flex-wrap gap-4 mb-4"
+					value={$selectedTheories[property]}
+					onValueChange={(value) =>
+						selectedTheories.update((theories) => ({
+							...theories,
+							[property]: value,
+						}))}
+				>
+					{#each Object.keys(details.formulas) as theory}
+						<div class="flex items-center space-x-2">
+							<RadioGroupItem value={theory} id={`${property}-${theory}`} />
+							<Label for={`${property}-${theory}`}>{theory}</Label>
+						</div>
+					{/each}
+				</RadioGroup>
+				<div class="mb-4">
+					<div class="overflow-x-auto">
+						<Katex math={details.formulas[$selectedTheories[property]].latex} displayMode={true} />
+					</div>
+				</div>
+			
+			</div>
 
-      <Label>Model</Label>
-      <RadioGroup
-        class="flex flex-wrap gap-4 mb-4"
-        value={$selectedTheories[property]}
-        onValueChange={(value) =>
-          selectedTheories.update((theories) => ({
-            ...theories,
-            [property]: value,
-          }))}
-      >
-        {#each Object.keys(details.formulas) as theory}
-          <div class="flex items-center space-x-2">
-            <RadioGroupItem value={theory} id={`${property}-${theory}`} />
-            <Label for={`${property}-${theory}`}>{theory}</Label>
-          </div>
-        {/each}
-      </RadioGroup>
+			<div class="bg-gray-500 w-1/2">
 
-      <div class="mb-4">
-        <div class="text-2xl font-bold">
-          {properties[property][$selectedTheories[property]].toFixed(3)}
-          {details.unit}
-        </div>
-      </div>
+			</div>
 
-      <div class="mb-4">
-        <div class="overflow-x-auto">
-          <Katex math={details.formulas[$selectedTheories[property]].latex} displayMode={true} />
-        </div>
-      </div>
     </div>
   {/each}
 </div>
