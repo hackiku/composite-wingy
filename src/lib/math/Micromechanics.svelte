@@ -1,16 +1,14 @@
 <!-- $lib/math/Micromechanics.svelte -->
 <script lang="ts">
   import { onMount } from 'svelte';
-  import Chart from 'chart.js/auto';
   import { materialStore, compositeMaterial, micromechanicalProperties } from "$lib/stores/materialStore";
   import { micromechProperties } from "./micromechanics";
   import { Label } from "$lib/components/ui/label";
   import { RadioGroup, RadioGroupItem } from "$lib/components/ui/radio-group";
   import { writable } from "svelte/store";
+  import * as Tabs from "$lib/components/ui/tabs";
   import Katex from "./Katex.svelte";
-
-  let chartCanvas: HTMLCanvasElement;
-  let chart: Chart;
+  import PropertiesChart from "./PropertiesChart.svelte";
 
   let selectedTheories = writable({});
   Object.keys(micromechProperties).forEach((prop) => {
@@ -24,91 +22,77 @@
   $: composite = $compositeMaterial;
   $: properties = $micromechanicalProperties;
 
-  $: if (properties && chart) {
-    updateChart();
+  function getRandomTheory(property) {
+    const theories = Object.keys(micromechProperties[property].formulas);
+    return theories[Math.floor(Math.random() * theories.length)];
   }
 
-  onMount(() => {
-    createChart();
-  });
-
-  function createChart() {
-    const ctx = chartCanvas.getContext('2d');
-    chart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: [],
-        datasets: []
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'top',
-          },
-          title: {
-            display: true,
-            text: 'Comparison of Micromechanical Properties'
-          }
-        }
-      }
-    });
-    updateChart();
-  }
-
-  function updateChart() {
-    const labels = Object.keys(micromechProperties);
-    const datasets = Object.keys(micromechProperties.E1.formulas).map(theory => ({
-      label: theory,
-      data: labels.map(prop => properties[prop][theory]),
-      backgroundColor: getRandomColor()
-    }));
-
-    chart.data.labels = labels;
-    chart.data.datasets = datasets;
-    chart.update();
-  }
-
-  function getRandomColor() {
-    return `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.6)`;
-  }
+  $: selectedModelProperties = Object.keys(properties).reduce((acc, property) => {
+    const randomTheory = getRandomTheory(property);
+    acc[property] = { [randomTheory]: properties[property][randomTheory] };
+    return acc;
+  }, {});
 </script>
 
 <div class="space-y-8">
-
-
   <h2 class="text-2xl font-semibold mb-4">Properties Comparison</h2>
 
-
-  <div class="overflow-x-auto">
-    <table class="w-full border-collapse border">
-      <thead>
-        <tr>
-          <th class="border p-2">Property</th>
-          {#each Object.keys(micromechProperties.E1.formulas) as theory}
-            <th class="border p-2">{theory}</th>
-          {/each}
-        </tr>
-      </thead>
-      <tbody>
-        {#each Object.entries(micromechProperties) as [property, details]}
-          <tr>
-            <td class="border p-2">{property} ({details.unit})</td>
-            {#each Object.keys(details.formulas) as theory}
-              <td class="border p-2">
-                {properties[property][theory].toFixed(3)}
-              </td>
+  <Tabs.Root value="all-models" class="w-full">
+    <Tabs.List>
+      <Tabs.Trigger value="all-models">All Models</Tabs.Trigger>
+      <Tabs.Trigger value="selected-model">Selected Model</Tabs.Trigger>
+    </Tabs.List>
+    <Tabs.Content value="all-models">
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse border">
+          <thead>
+            <tr>
+              <th class="border p-2">Property</th>
+              {#each Object.keys(micromechProperties.E1.formulas) as theory}
+                <th class="border p-2">{theory}</th>
+              {/each}
+            </tr>
+          </thead>
+          <tbody>
+            {#each Object.entries(micromechProperties) as [property, details]}
+              <tr>
+                <td class="border p-2">{property} ({details.unit})</td>
+                {#each Object.keys(details.formulas) as theory}
+                  <td class="border p-2">
+                    {properties[property][theory].toFixed(3)}
+                  </td>
+                {/each}
+              </tr>
             {/each}
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-  </div>
-
-
-  <canvas bind:this={chartCanvas}></canvas>
-
-
+          </tbody>
+        </table>
+      </div>
+      <PropertiesChart {properties} />
+    </Tabs.Content>
+    <Tabs.Content value="selected-model">
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse border">
+          <thead>
+            <tr>
+              <th class="border p-2">Property</th>
+              <th class="border p-2">Value</th>
+              <th class="border p-2">Theory</th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each Object.entries(selectedModelProperties) as [property, value]}
+              <tr>
+                <td class="border p-2">{property} ({micromechProperties[property].unit})</td>
+                <td class="border p-2">{Object.values(value)[0].toFixed(3)}</td>
+                <td class="border p-2">{Object.keys(value)[0]}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
+      <PropertiesChart properties={selectedModelProperties} />
+    </Tabs.Content>
+  </Tabs.Root>
 
   {#each Object.entries(micromechProperties) as [property, details]}
     <div class="border p-4 rounded-lg">

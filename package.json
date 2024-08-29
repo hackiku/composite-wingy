@@ -26,6 +26,7 @@
 	"dependencies": {
 		"bits-ui": "^0.21.13",
 		"chart.js": "^4.4.4",
+		"chartjs-plugin-annotation": "^3.0.1",
 		"chartjs-plugin-datalabels": "^2.2.0",
 		"clsx": "^2.1.1",
 		"katex": "^0.16.11",
