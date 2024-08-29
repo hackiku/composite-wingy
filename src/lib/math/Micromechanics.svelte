@@ -75,10 +75,10 @@
 </script>
 
 <div class="space-y-8">
-  <div class="mb-8">
-    <h2 class="text-2xl font-semibold mb-4">Properties Comparison</h2>
-    <canvas bind:this={chartCanvas}></canvas>
-  </div>
+
+
+  <h2 class="text-2xl font-semibold mb-4">Properties Comparison</h2>
+
 
   <div class="overflow-x-auto">
     <table class="w-full border-collapse border">
@@ -104,6 +104,11 @@
       </tbody>
     </table>
   </div>
+
+
+  <canvas bind:this={chartCanvas}></canvas>
+
+
 
   {#each Object.entries(micromechProperties) as [property, details]}
     <div class="border p-4 rounded-lg">
