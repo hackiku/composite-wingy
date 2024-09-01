@@ -1,5 +1,4 @@
 <!-- $lib/cad/CADViewer.svelte -->
-
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
@@ -8,6 +7,7 @@
   import * as Accordion from '$lib/components/ui/accordion';
   import { Plane, Edit } from 'lucide-svelte';
   import { wingStore, setSpan, setRoot, setTip, setFrontSweep, setRibIncrement, resetCustomParams } from '$lib/stores/wingStore';
+  import OnshapeModel from './OnshapeModel.svelte';
 
   $: ({ span, root, tip, frontSweep, ribIncrement } = $wingStore);
 
@@ -20,19 +20,21 @@
   ];
 
   function updateCADModel() {
-    // This function would trigger the update of the 3D model
     console.log('Updating CAD model with new parameters:', { span, root, tip, frontSweep, ribIncrement });
   }
 </script>
 
 <div class="flex flex-col gap-4 p-4 border rounded-lg">
-  
   <h2 class="text-2xl font-semibold flex items-center">
     <Plane class="mr-2 h-6 w-6" />
     CAD Model Viewer
   </h2>
-  
+
   <div class="mt-4 flex flex-col lg:flex-row gap-4">
+    <div class="w-full lg:w-2/3 h-60 lg:h-80">
+      <OnshapeModel />
+    </div>
+
     <div class="w-full lg:w-1/3">
       <Table>
         <TableHeader>
@@ -51,11 +53,9 @@
         </TableBody>
       </Table>
     </div>
-    
-    <div class="w-full lg:w-2/3 h-60 lg:h-80 bg-gray-200 flex items-center justify-center">
-      <p class="text-gray-500">Threlte gltf from static</p>
-    </div>
   </div>
+
+  <!-- Accordion content remains the same -->
 
   <Accordion.Root type="single" collapsible>
     <Accordion.Item value="edit-dimensions">
