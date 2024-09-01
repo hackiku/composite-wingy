@@ -24,6 +24,9 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@threlte/core": "^7.3.1",
+		"@threlte/extras": "^8.11.5",
+		"@types/three": "^0.168.0",
 		"bits-ui": "^0.21.13",
 		"chart.js": "^4.4.4",
 		"chartjs-plugin-annotation": "^3.0.1",
@@ -34,6 +37,7 @@
 		"mode-watcher": "^0.4.1",
 		"svelte-katex": "^0.1.2",
 		"tailwind-merge": "^2.5.0",
-		"tailwind-variants": "^0.2.1"
+		"tailwind-variants": "^0.2.1",
+		"three": "^0.168.0"
 	}
 }
