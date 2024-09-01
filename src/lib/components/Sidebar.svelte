@@ -5,6 +5,7 @@
   import { Plane, Settings, Calculator } from 'lucide-svelte';
   import { Label } from "$lib/components/ui/label";
 	import { Checkbox } from "$lib/components/ui/checkbox";
+	import { Slider } from "$lib/components/ui/slider";
 
   import * as Select from "$lib/components/ui/select";
   import { selectedAircraft } from '$lib/stores/aircraft';
@@ -103,7 +104,7 @@
 
       <div>
         <Label for="void">Void space: {material.Vvoid.toFixed(3)}</Label>
-        <input
+				<input
           type="range"
           id="void"
           bind:value={material.Vvoid}
