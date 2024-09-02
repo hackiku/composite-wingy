@@ -42,7 +42,7 @@
     
 		<h2 class="text-lg font-semibold mb-4 flex items-center">
       <Plane class="mr-2 h-5 w-5" />
-      Composite Wingy
+       Wingy
     </h2>
 
     <div class="space-y-4">

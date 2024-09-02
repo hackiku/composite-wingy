@@ -1,6 +1,5 @@
 <!-- $lib/cad/Scene.svelte -->
 
-<!-- $lib/cad/Scene.svelte -->
 <script lang="ts">
 	import { T } from '@threlte/core';
   import { Grid, OrbitControls } from '@threlte/extras';
