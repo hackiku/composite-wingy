@@ -3,7 +3,7 @@
 <script lang="ts">
 	import WingLoadCalculator from '$lib/math/WingLoadCalculator.svelte';
   import CADViewer from '$lib/cad/CADViewer.svelte';
-	// import Micromechanics from '$lib/math/Micromechanics.svelte';
+	import Micromechanics from '$lib/math/Micromechanics.svelte';
 </script>
 
 <main class="p-8 space-y-12">
@@ -13,18 +13,21 @@
 
 
   <section>
-    <h2 class="text-2xl font-semibold mb-4">1️⃣ Aircraft & Wing</h2>
+    <div class="flex flex-col md:flex-row justify-between gap-6">
+			<h2 class="text-3xl font-semibold mb-4">1️⃣ Wing design</h2>
+			<p>hyy</p>
+		</div>
     <CADViewer />
   </section>
 
   <section>
     <h2 class="text-2xl font-semibold mb-4">2️⃣ Wing Load Calculation</h2>
-    <WingLoadCalculator />
+    <!-- <WingLoadCalculator /> -->
   </section>
 
   <section>
     <h2 class="text-2xl font-semibold mb-4">3️⃣ Composite Materials Properties</h2>
-    <!-- <Micromechanics /> -->
+    <Micromechanics />
   </section>
 
   <section>

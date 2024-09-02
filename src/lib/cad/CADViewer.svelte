@@ -8,7 +8,7 @@
   import WingTable from './WingTable.svelte';
 
   let tablePosition: 'left' | 'right' | 'hidden' = 'right';
-  let tableWidth = 33; // Width as a percentage
+  let tableWidth = 2; // Width as a percentage
 
   function sendToOnshape() {
     console.log('Sending data to Onshape:', $wingStore);
