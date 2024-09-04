@@ -1,8 +1,9 @@
 // src/lib/stores/uiStore.ts
 
-import { writable } from 'svelte/store';
+import { writable } from "svelte/store";
 
 export const uiStore = writable({
-	showGraphs: true,
-	showDetailedMath: false,
+  showGraphs: true,
+  showDetailedMath: false,
+  isSidebarOpen: false,
 });

@@ -11,11 +11,9 @@
 
   <!-- <Micromechanics /> -->
 
-
   <section>
     <div class="flex flex-col md:flex-row justify-between gap-6">
 			<h2 class="text-3xl font-semibold mb-4">1️⃣ Wing design</h2>
-			<p>hyy</p>
 		</div>
     <CADViewer />
   </section>
