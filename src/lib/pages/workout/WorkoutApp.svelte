@@ -1,39 +1,24 @@
 <!-- src/lib/pages/workout/WorkoutApp.svelte -->
-
 <script lang="ts">
   import { writable } from 'svelte/store';
   import HomeSelection from './components/HomeSelection.svelte';
   import ExerciseGuide from './components/ExerciseGuide.svelte';
   import WorkoutDisplay from './components/WorkoutDisplay.svelte';
+  import Nav from './components/Nav.svelte';
+  import { workouts } from './data/workouts';
+  import type { Workout } from './data/workouts';
 
-  // Basic workout data structure
-  type Exercise = {
-    name: string;
-    duration: number;
-    description: string;
-    image?: string;
-  };
 
-  const workouts = [
-    {
-      id: 'classic',
-      name: 'Classic 7-Minute Workout',
-      exercises: [
-        { name: 'Jumping Jacks', duration: 30, description: 'Full body jumping exercise' },
-        { name: 'Wall Sit', duration: 30, description: 'Lower body strength' },
-        { name: 'Push-Ups', duration: 30, description: 'Upper body strength' },
-        { name: 'Crunches', duration: 30, description: 'Core strength' },
-        // Add more exercises as needed
-      ]
-    }
-  ];
 
-  const currentScreen = writable('home'); // home, guide, workout
-  const selectedWorkout = writable(workouts[0]);
+  // Screen management
+  type Screen = 'home' | 'guide' | 'workout';
+  const currentScreen = writable<Screen>('home');
+  const selectedWorkout = writable<Workout>(workouts[0]);
   const currentExerciseIndex = writable(0);
   const isWorkoutPaused = writable(false);
 
-  function handleWorkoutSelect(workout) {
+  // Navigation handlers
+  function handleWorkoutSelect(workout: Workout) {
     selectedWorkout.set(workout);
     currentScreen.set('guide');
   }
@@ -49,29 +34,54 @@
     currentExerciseIndex.set(0);
     isWorkoutPaused.set(false);
   }
+
+  function handleBackToGuide() {
+    currentScreen.set('guide');
+    currentExerciseIndex.set(0);
+    isWorkoutPaused.set(false);
+  }
+
+  function handleQuickStart() {
+    // Use the classic workout for quick start
+    selectedWorkout.set(workouts[0]);
+    currentScreen.set('workout');
+    currentExerciseIndex.set(0);
+    isWorkoutPaused.set(false);
+  }
+
+  // Reactive statements for Nav props
+  $: navActiveSection = $currentScreen === 'workout' ? 'guide' : $currentScreen;
+  $: navWorkoutName = $currentScreen !== 'home' ? $selectedWorkout.name : undefined;
 </script>
 
+<div class="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900 text-gray-100">
+  <Nav 
+    activeSection={navActiveSection}
+    workoutName={navWorkoutName}
+    onHomeClick={handleBackToHome}
+    onGuideClick={handleBackToGuide}
+    onQuickStart={handleQuickStart}
+  />
 
-
-<main class="min-h-screen bg-gray-950/60 text-gray-100 
-				max-w-[1920px] px-4 sm:px-6 md:px-12 lg:px-16 xl:px-24 2xl:px-32">
-  {#if $currentScreen === 'home'}
-    <HomeSelection 
-      {workouts} 
-      onSelectWorkout={handleWorkoutSelect}
-    />
-  {:else if $currentScreen === 'guide'}
-    <ExerciseGuide 
-      workout={$selectedWorkout}
-      onStart={handleStartWorkout}
-      onBack={handleBackToHome}
-    />
-  {:else}
-    <WorkoutDisplay
-      workout={$selectedWorkout}
-      currentExerciseIndex={$currentExerciseIndex}
-      isPaused={$isWorkoutPaused}
-      onBack={handleBackToHome}
-    />
-  {/if}
-</main>
+  <main class="max-w-[1920px] mx-auto">
+    {#if $currentScreen === 'home'}
+      <HomeSelection 
+        {workouts} 
+        onSelectWorkout={handleWorkoutSelect}
+      />
+    {:else if $currentScreen === 'guide'}
+      <ExerciseGuide 
+        workout={$selectedWorkout}
+        onStart={handleStartWorkout}
+        onBack={handleBackToHome}
+      />
+    {:else}
+      <WorkoutDisplay
+        workout={$selectedWorkout}
+        currentExerciseIndex={$currentExerciseIndex}
+        isPaused={$isWorkoutPaused}
+        onBack={handleBackToGuide}
+      />
+    {/if}
+  </main>
+</div>
