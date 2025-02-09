@@ -2,7 +2,7 @@
 
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
-  import { Plane, Settings, Calculator } from 'lucide-svelte';
+  import { CookingPot, Settings, Calculator } from 'lucide-svelte';
   import { Label } from "$lib/components/ui/label";
 	import { Checkbox } from "$lib/components/ui/checkbox";
 	import { Slider } from "$lib/components/ui/slider";
@@ -41,8 +41,8 @@
   <div class="fixed w-64 h-full overflow-y-auto p-4 border-r">
     
 		<h2 class="text-lg font-semibold mb-4 flex items-center">
-      <Plane class="mr-2 h-5 w-5" />
-       Wingy
+      <CookingPot class="mr-2 h-5 w-5" />
+       Cooking Pot
     </h2>
 
     <div class="space-y-4">

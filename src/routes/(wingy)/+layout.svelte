@@ -1,6 +1,6 @@
-<!-- src/routes/+layout.svelte -->
+<!-- src/routes/(wingy)/+layout.svelte -->
 <script lang="ts">
-  import "../app.css";
+  import "../../app.css";
   import { ModeWatcher } from "mode-watcher";
   import Nav from '$lib/components/Nav.svelte';
   import Sidebar from '$lib/components/Sidebar.svelte';
