@@ -2,18 +2,29 @@
 
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { 
+    leftDividerPosition, 
+    rightDividerPosition,
+    isDragging,
+    activeDivider,
+    autoAnimating,
+    animationDirection,
+    animationSpeed
+  } from './learnforceStore';
   
-  // Draggable selector state
-  let isDragging = false;
   let startX = 0;
-  let dividerPosition = 50; // Start in the middle (50%)
   let selectorContainer;
   let containerWidth = 0;
+  let animationFrame;
   
   // Handle mouse/touch events for dragging
-  function handleMouseDown(e) {
-    isDragging = true;
-    startX = e.clientX || e.touches[0].clientX;
+  function handleMouseDown(e, divider) {
+    // Stop auto-animation when user interacts
+    stopAutoAnimation();
+    
+    isDragging.set(true);
+    activeDivider.set(divider);
+    startX = e.clientX || e.touches?.[0]?.clientX || 0;
     
     // Add event listeners for drag and release
     window.addEventListener('mousemove', handleMouseMove);
@@ -23,28 +34,96 @@
   }
   
   function handleMouseMove(e) {
-    if (!isDragging) return;
+    let isDraggingValue;
+    isDragging.subscribe(value => isDraggingValue = value)();
+    if (!isDraggingValue) return;
     
     e.preventDefault();
-    const clientX = e.clientX || e.touches[0].clientX;
+    const clientX = e.clientX || e.touches?.[0]?.clientX || 0;
     const deltaX = clientX - startX;
+    const percentDelta = (deltaX / containerWidth) * 100;
     
-    // Calculate new position as percentage of container width
-    const newPosition = Math.max(0, Math.min(100, dividerPosition + (deltaX / containerWidth * 100)));
-    dividerPosition = newPosition;
+    let activeDividerValue;
+    let leftDividerValue;
+    let rightDividerValue;
+    
+    activeDivider.subscribe(value => activeDividerValue = value)();
+    leftDividerPosition.subscribe(value => leftDividerValue = value)();
+    rightDividerPosition.subscribe(value => rightDividerValue = value)();
+    
+    if (activeDividerValue === 'left') {
+      // Ensure left divider doesn't go beyond right divider
+      const newPosition = Math.max(0, Math.min(rightDividerValue - 5, leftDividerValue + percentDelta));
+      leftDividerPosition.set(newPosition);
+    } else if (activeDividerValue === 'right') {
+      // Ensure right divider doesn't go below left divider
+      const newPosition = Math.max(leftDividerValue + 5, Math.min(100, rightDividerValue + percentDelta));
+      rightDividerPosition.set(newPosition);
+    }
     
     // Update start position for next move
     startX = clientX;
   }
   
   function handleMouseUp() {
-    isDragging = false;
+    isDragging.set(false);
+    activeDivider.set(null);
     
     // Remove event listeners
     window.removeEventListener('mousemove', handleMouseMove);
     window.removeEventListener('touchmove', handleMouseMove);
     window.removeEventListener('mouseup', handleMouseUp);
     window.removeEventListener('touchend', handleMouseUp);
+  }
+  
+  function startAutoAnimation() {
+    autoAnimating.set(true);
+    
+    function animate() {
+      let autoAnimatingValue;
+      let animationDirectionValue;
+      let leftDividerValue;
+      let rightDividerValue;
+      let animationSpeedValue;
+      
+      autoAnimating.subscribe(value => autoAnimatingValue = value)();
+      animationDirection.subscribe(value => animationDirectionValue = value)();
+      leftDividerPosition.subscribe(value => leftDividerValue = value)();
+      rightDividerPosition.subscribe(value => rightDividerValue = value)();
+      animationSpeed.subscribe(value => animationSpeedValue = value)();
+      
+      if (!autoAnimatingValue) return;
+      
+      // Calculate the new position based on current direction
+      if (animationDirectionValue === 1) {
+        // Expanding
+        rightDividerPosition.set(rightDividerValue + animationSpeedValue);
+        if (rightDividerValue >= 80) {
+          // Start contracting when reaches maximum
+          animationDirection.set(-1);
+        }
+      } else {
+        // Contracting
+        leftDividerPosition.set(leftDividerValue + animationSpeedValue);
+        if (leftDividerValue >= 40) {
+          // Reset to starting positions when fully contracted
+          leftDividerPosition.set(15);
+          rightDividerPosition.set(65);
+          animationDirection.set(1);
+        }
+      }
+      
+      animationFrame = requestAnimationFrame(animate);
+    }
+    
+    animationFrame = requestAnimationFrame(animate);
+  }
+  
+  function stopAutoAnimation() {
+    autoAnimating.set(false);
+    if (animationFrame) {
+      cancelAnimationFrame(animationFrame);
+    }
   }
   
   onMount(() => {
@@ -55,9 +134,13 @@
       window.addEventListener('resize', () => {
         containerWidth = selectorContainer.offsetWidth;
       });
+      
+      // Start auto animation
+      startAutoAnimation();
     }
     
     return () => {
+      stopAutoAnimation();
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('touchmove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
@@ -67,45 +150,78 @@
   });
 </script>
 
-<div class="max-w-3xl mx-auto px-4 py-44">
-  <!-- Interactive Headline with Draggable Selector -->
+<div class="max-w-4xl mx-auto px-4 py-24">
+  <!-- Interactive Headline with Draggable Selectors -->
   <div 
-    class="relative bg-muted inline-block px-8 py-4 text-6xl font-bold tracking-tight cursor-grab active:cursor-grabbing"
+    class="relative inline-block px-8 py-4 text-6xl font-bold tracking-tight"
     bind:this={selectorContainer}
-    on:mousedown={handleMouseDown}
-    on:touchstart={handleMouseDown}
   >
     <!-- The full text -->
     <div class="relative overflow-hidden">
-      <span>Learning development</span>
+      <span>Learning & Development</span>
       
-      <!-- Draggable Divider -->
+      <!-- Left Draggable Divider -->
       <div 
         class="absolute top-0 bottom-0 w-0.5 bg-foreground cursor-col-resize"
-        style="left: {dividerPosition}%;"
+        style="left: {$leftDividerPosition}%;"
+        on:mousedown={(e) => handleMouseDown(e, 'left')}
+        on:touchstart={(e) => handleMouseDown(e, 'left')}
       ></div>
       
-      <!-- Highlight overlay for Learning -->
+      <!-- Right Draggable Divider -->
       <div 
-        class="absolute top-0 bottom-0 bg-primary/20 pointer-events-none"
-        style="left: 0; width: {dividerPosition}%;"
+        class="absolute top-0 bottom-0 w-0.5 bg-foreground cursor-col-resize"
+        style="left: {$rightDividerPosition}%;"
+        on:mousedown={(e) => handleMouseDown(e, 'right')}
+        on:touchstart={(e) => handleMouseDown(e, 'right')}
       ></div>
       
-      <!-- Highlight overlay for development -->
+      <!-- Left section -->
       <div 
-        class="absolute top-0 bottom-0 bg-secondary/20 pointer-events-none"
-        style="left: {dividerPosition}%; width: {100 - dividerPosition}%;"
+        class="absolute top-0 bottom-0 pointer-events-none"
+        style="left: 0; width: {$leftDividerPosition}%;"
       ></div>
+      
+      <!-- Middle (highlighted) section -->
+      <div 
+        class="absolute top-0 bottom-0 bg-secondary/30 pointer-events-none"
+        style="left: {$leftDividerPosition}%; width: {$rightDividerPosition - $leftDividerPosition}%;"
+      ></div>
+      
+      <!-- Right section -->
+      <div 
+        class="absolute top-0 bottom-0 pointer-events-none"
+        style="left: {$rightDividerPosition}%; width: {100 - $rightDividerPosition}%;"
+      ></div>
+      
+      <!-- Drag handles (easier to grab) -->
+      <div 
+        class="absolute top-0 bottom-0 w-6 cursor-col-resize flex items-center justify-center"
+        style="left: calc({$leftDividerPosition}% - 12px);"
+        on:mousedown={(e) => handleMouseDown(e, 'left')}
+        on:touchstart={(e) => handleMouseDown(e, 'left')}
+      >
+        <div class="h-6 w-1 bg-foreground rounded-full"></div>
+      </div>
+      
+      <div 
+        class="absolute top-0 bottom-0 w-6 cursor-col-resize flex items-center justify-center"
+        style="left: calc({$rightDividerPosition}% - 12px);"
+        on:mousedown={(e) => handleMouseDown(e, 'right')}
+        on:touchstart={(e) => handleMouseDown(e, 'right')}
+      >
+        <div class="h-6 w-1 bg-foreground rounded-full"></div>
+      </div>
     </div>
   </div>
   
   <!-- Tagline -->
-  <p class="text-2xl text-muted-foreground mt-8">With just the right amount of tech.</p>
+  <p class="text-2xl text-muted-foreground mt-8">Powered by science, passion, and just the right amount of tech.</p>
 </div>
 
 <style>
   /* Prevent text selection during dragging */
-  .cursor-grab, .cursor-grabbing {
+  .cursor-col-resize {
     user-select: none;
   }
 </style>

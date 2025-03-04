@@ -4,6 +4,8 @@
   import { ModeWatcher } from "mode-watcher";
   import Nav from '$lib/pages/learnforce/Nav.svelte';
   import Hero from '$lib/pages/learnforce/Hero.svelte';
+  import BottomNav from '$lib/pages/learnforce/BottomNav.svelte';
+  import Content from '$lib/pages/learnforce/Content.svelte';
 </script>
 
 <svelte:head>
@@ -12,7 +14,9 @@
 
 <ModeWatcher />
 
-<main class="min-h-screen font-sans">
+<main class="min-h-screen font-serif">
   <Nav />
   <Hero />
+  <Content />
+  <BottomNav />
 </main>
