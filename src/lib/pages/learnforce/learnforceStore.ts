@@ -1,5 +1,5 @@
 // src/lib/pages/learnforce/learnforceStore.ts
-import { writable } from 'svelte/store';
+import { writable, derived } from 'svelte/store';
 
 // Hero Draggable Selector Store
 export const leftDividerPosition = writable(15);
@@ -38,3 +38,37 @@ export const navItems = [
 		anchor: '#performance-programs'
 	}
 ];
+
+// Floating tags
+export const learningTags = [
+	{ text: "Skills", class: "rotate-6" },
+	{ text: "Knowledge", class: "-rotate-3" },
+	{ text: "Growth", class: "rotate-12" },
+	{ text: "Training", class: "-rotate-6" },
+	{ text: "Education", class: "rotate-2" },
+	{ text: "Development", class: "-rotate-12" }
+];
+
+export const developmentTags = [
+	{ text: "Capability", class: "-rotate-6" },
+	{ text: "Potential", class: "rotate-3" },
+	{ text: "Progress", class: "-rotate-12" },
+	{ text: "Innovation", class: "rotate-6" },
+	{ text: "Evolution", class: "-rotate-2" },
+	{ text: "Advancement", class: "rotate-12" }
+];
+
+// Derived store for calculating tag opacities
+export const learningOpacity = derived(leftDividerPosition, $leftDividerPosition => {
+	// As leftDividerPosition increases, learning is less selected, so opacity decreases
+	return Math.max(0.2, 1 - ($leftDividerPosition / 50));
+});
+
+export const developmentOpacity = derived(
+	[leftDividerPosition, rightDividerPosition],
+	([$leftDividerPosition, $rightDividerPosition]) => {
+		// Development opacity is based on how much of it is selected
+		const selectedPortion = (100 - $rightDividerPosition) / 50;
+		return Math.max(0.2, selectedPortion);
+	}
+);

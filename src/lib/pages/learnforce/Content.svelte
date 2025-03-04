@@ -4,20 +4,7 @@
   import { ArrowRight } from 'lucide-svelte';
 </script>
 
-<div class="max-w-4xl mx-auto px-4">
-  <!-- Rounded image with semi-transparent background after hero -->
-  <div class="relative rounded-2xl overflow-hidden mb-24 mt-8">
-    <div class="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 z-0"></div>
-    <img 
-      src="/api/placeholder/1200/600" 
-      alt="Learning development"
-      class="w-full h-auto max-h-[400px] object-cover relative z-10 opacity-85"
-    />
-    <div class="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-background/90 to-transparent z-20">
-      <p class="text-xl">Your people don't just need skills—they need the right opportunities to grow, adapt, and contribute at their best.</p>
-    </div>
-  </div>
-  
+<div class="max-w-4xl mx-auto px-4">  
   <!-- Learning Solutions Section -->
   <section id="learning-solutions" class="mb-24 scroll-mt-24">
     <h2 class="text-4xl font-bold mb-6">Learning mapped to your people's career journey</h2>

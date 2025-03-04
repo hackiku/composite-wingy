@@ -33,6 +33,12 @@
     activeNavItem.set(id);
     hoveredNavItem.set(id);
     updatePillPosition(id, activePillElement);
+    
+    // Scroll to the section
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
   
   function updatePillPosition(id: string, pillEl: HTMLElement) {

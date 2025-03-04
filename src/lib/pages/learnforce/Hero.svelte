@@ -9,7 +9,11 @@
     activeDivider,
     autoAnimating,
     animationDirection,
-    animationSpeed
+    animationSpeed,
+    learningTags,
+    developmentTags,
+    learningOpacity,
+    developmentOpacity
   } from './learnforceStore';
   
   let startX = 0;
@@ -150,7 +154,31 @@
   });
 </script>
 
-<div class="max-w-4xl mx-auto px-4 py-24">
+<div class="max-w-3xl mx-auto px-4 py-24">
+  <!-- Learning tags on the left -->
+  <div class="absolute left-4 md:left-16 top-32 md:top-48 space-y-3 w-32 md:w-40">
+    {#each learningTags as tag}
+      <div 
+        class="inline-block px-3 py-1 bg-primary/10 rounded-full text-sm font-medium {tag.class} transition-opacity duration-300"
+        style="opacity: {$learningOpacity};"
+      >
+        {tag.text}
+      </div>
+    {/each}
+  </div>
+  
+  <!-- Development tags on the right -->
+  <div class="absolute right-4 md:right-16 top-32 md:top-48 space-y-3 w-32 md:w-40 text-right">
+    {#each developmentTags as tag}
+      <div 
+        class="inline-block px-3 py-1 bg-secondary/10 rounded-full text-sm font-medium {tag.class} transition-opacity duration-300"
+        style="opacity: {$developmentOpacity};"
+      >
+        {tag.text}
+      </div>
+    {/each}
+  </div>
+  
   <!-- Interactive Headline with Draggable Selectors -->
   <div 
     class="relative inline-block px-8 py-4 text-6xl font-bold tracking-tight"
@@ -158,7 +186,7 @@
   >
     <!-- The full text -->
     <div class="relative overflow-hidden">
-      <span>Learning & Development</span>
+      <span>Learning development</span>
       
       <!-- Left Draggable Divider -->
       <div 
